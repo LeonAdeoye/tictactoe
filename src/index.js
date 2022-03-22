@@ -11,10 +11,14 @@ class Square extends React.Component
 
         // By calling this.setState from an onClick handler in the Square’s render method, we tell React to re-render that Square whenever its <button> is clicked.
         // After the update, the Square’s this.state.value will be 'X', so we’ll see the X on the game board. If you click on any Square, an X should show up.
-        // When you call setState in a component, React automatically updates the child components inside of it too.
+        // When you call setState in a component, React automatically updates the child components inside it too.
+
+        // Since the Square components no longer maintain state, the Square components receive values from the Board component and inform the Board component when they’re clicked.
+        // In React terms, the Square components are now controlled components. The Board has full control over them.
+        // Now we’re passing down two props from Board to Square: value and onClick. The onClick prop is a function that Square can call when clicked.
         return (
             <button className="square"
-                    onClick={() =>  this.props.onClick()}> // Now we’re passing down two props from Board to Square: value and onClick. The onClick prop is a function that Square can call when clicked.
+                    onClick={ () =>  this.props.onClick() }>
                 {this.props.value}
             </button>
         );
@@ -43,13 +47,13 @@ class Board extends React.Component
         this.setState({squares: squares});
     }
 
+    // Each Square will now receive a value prop that will either be 'X', 'O', or null for empty squares.
+    // Next, we need to change what happens when a Square is clicked. The Board component now maintains which squares are filled.
+    // We need to create a way for the Square to update the Board’s state.
+    // Since state is considered to be private to a component that defines it, we cannot update the Board’s state directly from Square.
+    // Instead, we’ll pass down a function from the Board to the Square, and we’ll have Square call that function when a square is clicked.
     renderSquare(i)
     {
-        // Each Square will now receive a value prop that will either be 'X', 'O', or null for empty squares.
-        // Next, we need to change what happens when a Square is clicked. The Board component now maintains which squares are filled.
-        // We need to create a way for the Square to update the Board’s state.
-        // Since state is considered to be private to a component that defines it, we cannot update the Board’s state directly from Square.
-        // Instead, we’ll pass down a function from the Board to the Square, and we’ll have Square call that function when a square is clicked.
         return (<Square value={this.state.squares[i]}
                         onClick={() => this.handleClick(i)} />);
     }
