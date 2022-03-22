@@ -2,27 +2,17 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-class Square extends React.Component
+// In React, function components are a simpler way to write components that only contain a render method and don’t have their own state.
+// Instead of defining a class which extends React.Component, we can write a function that takes props as input and returns what should be rendered.
+// Function components are less tedious to write than classes, and many components can be expressed this way.
+function Square(props)
 {
-    render()
-    {
-        // Notice how with onClick={() => console.log('click')}, we’re passing a function as the onClick prop. React will only call this function after a click.
-        // Forgetting () => and writing onClick={console.log('click')} is a common mistake, and would fire every time the component re-renders.
-
-        // By calling this.setState from an onClick handler in the Square’s render method, we tell React to re-render that Square whenever its <button> is clicked.
-        // After the update, the Square’s this.state.value will be 'X', so we’ll see the X on the game board. If you click on any Square, an X should show up.
-        // When you call setState in a component, React automatically updates the child components inside it too.
-
-        // Since the Square components no longer maintain state, the Square components receive values from the Board component and inform the Board component when they’re clicked.
-        // In React terms, the Square components are now controlled components. The Board has full control over them.
-        // Now we’re passing down two props from Board to Square: value and onClick. The onClick prop is a function that Square can call when clicked.
-        return (
-            <button className="square"
-                    onClick={ () =>  this.props.onClick() }>
-                {this.props.value}
-            </button>
-        );
-    }
+    return (
+        <button className="square"
+                onClick={ () =>  props.onClick() }>
+            {props.value}
+        </button>
+    );
 }
 
 class Board extends React.Component
@@ -37,14 +27,26 @@ class Board extends React.Component
         // Let’s store the current value of the Square in this.state, and change it when the Square is clicked.
         this.state = {
             squares: Array(9).fill(null),
+            xIsNext: true,
         };
     }
 
+    // Each time a player moves, xIsNext (a boolean) will be flipped to determine which player goes next and the game’s state will be saved.
+    // We’ll update the Board’s handleClick function to flip the value of xIsNext.
     handleClick(i)
     {
         const squares = this.state.squares.slice();
-        squares[i] = 'X';
-        this.setState({squares: squares});
+        if (calculateWinner(squares) || squares[i])
+        {
+            return;
+        }
+
+        squares[i] = this.state.xIsNext ? 'X' : 'O';
+
+        this.setState({
+            squares: squares,
+            xIsNext: !this.state.xIsNext
+        });
     }
 
     // Each Square will now receive a value prop that will either be 'X', 'O', or null for empty squares.
@@ -60,7 +62,18 @@ class Board extends React.Component
 
     render()
     {
-        const status = 'Next player: X';
+        const winner = calculateWinner(this.state.squares);
+
+        let status;
+        if(winner)
+        {
+            status = 'Congratulations! The winner is: ' + winner;
+        }
+        else
+        {
+            // Change the “status” text in Board’s render so that it displays which player has the next turn:
+            status = 'The next player is: ' + (this.state.xIsNext ? 'X' : 'O') ;
+        }
 
         return (
             <div>
@@ -83,6 +96,30 @@ class Board extends React.Component
             </div>
         );
     }
+}
+
+function calculateWinner(squares)
+{
+    const lines = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6],
+    ];
+
+    for (let i = 0; i < lines.length; i++)
+    {
+        const [a, b, c] = lines[i];
+        if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c])
+        {
+            return squares[a];
+        }
+    }
+    return null;
 }
 
 class Game extends React.Component
