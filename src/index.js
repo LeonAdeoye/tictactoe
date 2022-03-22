@@ -17,38 +17,6 @@ function Square(props)
 
 class Board extends React.Component
 {
-    // In JavaScript classes, you need to always call super when defining the constructor of a subclass.
-    // All React component classes that have a constructor should start with a super(props) call.
-    constructor(props)
-    {
-        super(props);
-        // React components can have state by setting this.state in their constructors.
-        // this.state should be considered as private to a React component that it’s defined in.
-        // Let’s store the current value of the Square in this.state, and change it when the Square is clicked.
-        this.state = {
-            squares: Array(9).fill(null),
-            xIsNext: true,
-        };
-    }
-
-    // Each time a player moves, xIsNext (a boolean) will be flipped to determine which player goes next and the game’s state will be saved.
-    // We’ll update the Board’s handleClick function to flip the value of xIsNext.
-    handleClick(i)
-    {
-        const squares = this.state.squares.slice();
-        if (calculateWinner(squares) || squares[i])
-        {
-            return;
-        }
-
-        squares[i] = this.state.xIsNext ? 'X' : 'O';
-
-        this.setState({
-            squares: squares,
-            xIsNext: !this.state.xIsNext
-        });
-    }
-
     // Each Square will now receive a value prop that will either be 'X', 'O', or null for empty squares.
     // Next, we need to change what happens when a Square is clicked. The Board component now maintains which squares are filled.
     // We need to create a way for the Square to update the Board’s state.
@@ -56,28 +24,14 @@ class Board extends React.Component
     // Instead, we’ll pass down a function from the Board to the Square, and we’ll have Square call that function when a square is clicked.
     renderSquare(i)
     {
-        return (<Square value={this.state.squares[i]}
-                        onClick={() => this.handleClick(i)} />);
+        return (<Square value={this.props.squares[i]}
+                        onClick={() => this.props.onClick(i)} />);
     }
 
     render()
     {
-        const winner = calculateWinner(this.state.squares);
-
-        let status;
-        if(winner)
-        {
-            status = 'Congratulations! The winner is: ' + winner;
-        }
-        else
-        {
-            // Change the “status” text in Board’s render so that it displays which player has the next turn:
-            status = 'The next player is: ' + (this.state.xIsNext ? 'X' : 'O') ;
-        }
-
         return (
             <div>
-                <div className="status">{status}</div>
                 <div className="board-row">
                     {this.renderSquare(0)}
                     {this.renderSquare(1)}
@@ -122,18 +76,107 @@ function calculateWinner(squares)
     return null;
 }
 
+function calculateDraw(squares)
+{
+    for (let i = 0; i < squares.length; i++)
+    {
+        if (!squares[i])
+            return false;
+    }
+    return true;
+}
+
 class Game extends React.Component
 {
+    // In JavaScript classes, you need to always call super when defining the constructor of a subclass.
+    // All React component classes that have a constructor should start with a super(props) call.
+    constructor(props)
+    {
+        super(props);
+        this.state =
+        {
+            history: [{ squares: Array(9).fill(null)}],
+            xIsNext: true,
+            stepNumber: 0, // Added stepNumber to the Game component’s state to indicate which step we’re currently viewing.
+        };
+    }
+
+    // Each time a player moves, xIsNext (a boolean) will be flipped to determine which player goes next and the game’s state will be saved.
+    // We’ll update the Board’s handleClick function to flip the value of xIsNext.
+    handleClick(i)
+    {
+        const history = this.state.history.slice(0, this.state.stepNumber + 1);
+        const current = history[history.length - 1];
+        const squares = current.squares.slice();
+        if (calculateWinner(squares) || squares[i])
+        {
+            return;
+        }
+        squares[i] = this.state.xIsNext ? 'X' : 'O';
+        // Unlike the array push() method you might be more familiar with, the concat() method does not mutate the original array, so we prefer it.
+        this.setState({
+            history: history.concat([{
+                squares: squares,
+            }]),
+            stepNumber: history.length,
+            xIsNext: !this.state.xIsNext,
+        });
+    }
+
+    jumpTo(step)
+    {
+        this.setState({
+            stepNumber: step,
+            xIsNext: (step % 2) === 0,
+        });
+    }
+
     render()
     {
+        const history = this.state.history;
+        const current = history[this.state.stepNumber];
+        const winner = calculateWinner(current.squares);
+
+        // Using the map method, we can map our history of moves to React elements representing buttons on the screen, and display a list of buttons to “jump” to past moves.
+        // As we iterate through history array, STEP variable refers to the current history element value, and MOVE variable refers to the current history element index.
+        // We are only interested in move here, hence step is not getting assigned to anything.
+        // For each move in the tic-tac-toe game’s history, we create a list item <li> which contains a button <button>.
+        // The button has a onClick handler which calls a method called this.jumpTo().
+        const moves = history.map((step, move) =>
+        {
+            const desc = move ?
+                'Go to move #' + move :
+                'Go to game start';
+            return (
+                <li key={move}>
+                    <button onClick={() => this.jumpTo(move)}>{desc}</button>
+                </li>
+            );
+        });
+
+        let status;
+        if(winner)
+        {
+            status = 'Congratulations! The winner is: ' + winner;
+        }
+        else
+        {
+            // Change the “status” text in Board’s render so that it displays which player has the next turn:
+            if(calculateDraw(current.squares))
+                status = 'This is a draw!!!'
+            else
+                status = 'The next player is: ' + (this.state.xIsNext ? 'X' : 'O') ;
+        }
+
         return (
             <div className="game">
                 <div className="game-board">
-                    <Board />
+                    <Board squares={current.squares}
+                           onClick={(i) => this.handleClick(i)} />
                 </div>
                 <div className="game-info">
-                    <div>{/* status */}</div>
-                    <ol>{/* TODO */}</ol>
+                    <div>{status}</div>
+                    <ol>{moves}</ol>
                 </div>
             </div>
         );
