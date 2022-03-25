@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import NameForm from "./components/NameForm";
 
 // In React, function components are a simpler way to write components that only contain a render method and don’t have their own state.
 // Instead of defining a class which extends React.Component, we can write a function that takes props as input and returns what should be rendered.
@@ -178,6 +179,7 @@ class Game extends React.Component
                            onClick={(i) => this.handleClick(i)} />
                 </div>
                 <div className="game-info">
+                    <NameForm/>
                     <NumberList numbers={[1,2,3,4,5]}/>
                     <NumberList numbers={numbers}/>
                     <LoginControl></LoginControl>
