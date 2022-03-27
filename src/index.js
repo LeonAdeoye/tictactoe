@@ -2,6 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import NameForm from "./components/NameForm";
+import SignUpDialog from "./components/SignUpDialog"
+import LoginControl from "./components/LoginControl"
+import Toggle from "./components/Toggle";
 
 // In React, function components are a simpler way to write components that only contain a render method and don’t have their own state.
 // Instead of defining a class which extends React.Component, we can write a function that takes props as input and returns what should be rendered.
@@ -179,6 +182,8 @@ class Game extends React.Component
                            onClick={(i) => this.handleClick(i)} />
                 </div>
                 <div className="game-info">
+                    <SignUpDialog/>
+                    <br/>
                     <NameForm/>
                     <NumberList numbers={[1,2,3,4,5]}/>
                     <NumberList numbers={numbers}/>
@@ -259,116 +264,7 @@ class Clock extends React.Component
     }
 }
 
-class Toggle extends React.Component
-{
-    constructor(props)
-    {
-        super(props);
-        this.state = {isToggleOn: true};
 
-        // You have to be careful about the meaning of this in JSX callbacks. In JavaScript, class methods are not bound by default.
-        // If you forget to bind this.handleClick and pass it to onClick, this will be undefined when the function is actually called.
-        // this.handleClick = this.handleClick.bind(this); COMMENTED OUT
-        // This is the matching syntax <button onClick={this.handleClick}>
-        // However to avoid explicit binding you can use this syntax: button onClick={() => this.handleClick()}>
-        // BUT: The problem with this syntax is that a different callback is created each time the LoggingButton renders.
-        // In most cases, this is fine. However, if this callback is passed as a prop to lower components, those components might do an extra re-rendering.
-        // We generally recommend binding in the constructor or using the class field syntax, to avoid this sort of performance problem.
-        // If calling bind annoys you, there is another way you can get around this.
-        // If you are using the experimental public class fields syntax, you can use class fields to correctly bind callbacks:
-        // handleClick = () => {  console.log('this is');   }
-    }
-
-    // Experimental public class syntax, see comment above with explanation.
-    handleClick = () =>
-    {
-        this.setState(prevState => ({
-            isToggleOn: !prevState.isToggleOn
-        }));
-    }
-
-    render()
-    {
-        return (
-            <button onClick={this.handleClick}>
-                {this.state.isToggleOn ? 'ON' : 'OFF'}
-            </button>
-        );
-    }
-}
-
-class LoginControl extends React.Component {
-    constructor(props)
-    {
-        super(props);
-        // this.handleLoginClick = this.handleLoginClick.bind(this);
-        // this.handleLogoutClick = this.handleLogoutClick.bind(this);
-        this.state = {isLoggedIn: false};
-    }
-
-    // Prefer to use experimental public class syntax so commenting out above bindings in constructor.
-    handleLoginClick = () =>
-    {
-        this.setState({isLoggedIn: true});
-    }
-
-    // Prefer to use experimental public class syntax so commenting out above bindings in constructor.
-    handleLogoutClick = () =>
-    {
-        this.setState({isLoggedIn: false});
-    }
-
-    render()
-    {
-        const isLoggedIn = this.state.isLoggedIn;
-        let button;
-        button =  isLoggedIn ? <LogoutButton onClick={this.handleLogoutClick} /> : <LoginButton onClick={this.handleLoginClick} />
-        return (
-            <div>
-                <Greeting isLoggedIn={isLoggedIn} />
-                {button}
-            </div>
-        );
-    }
-}
-
-function UserGreeting(props)
-{
-    return <h1>Welcome back!</h1>;
-}
-
-function GuestGreeting(props)
-{
-    return <h1>Please sign up.</h1>;
-}
-
-function Greeting(props)
-{
-    const isLoggedIn = props.isLoggedIn;
-    if (isLoggedIn)
-    {
-        return <UserGreeting />;
-    }
-    return <GuestGreeting />;
-}
-
-function LoginButton(props)
-{
-    return (
-        <button onClick={props.onClick}>
-            Login
-        </button>
-    );
-}
-
-function LogoutButton(props)
-{
-    return (
-        <button onClick={props.onClick}>
-            Logout
-        </button>
-    );
-}
 
 // Each list item needs a “key” which is a special string attribute you need to include when creating lists of elements without which you will get warnings in DevTools console.
 // Keys help React identify which items have changed, are added, or are removed. Keys should be given to the elements inside the array to give the elements a stable identity.
