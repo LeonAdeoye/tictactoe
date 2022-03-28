@@ -5,7 +5,10 @@ class Toggle extends React.Component
     constructor(props)
     {
         super(props);
-        this.state = {isToggleOn: true};
+        this.state = {
+            isToggleOn: true,
+            count:0
+        };
 
         // You have to be careful about the meaning of this in JSX callbacks. In JavaScript, class methods are not bound by default.
         // If you forget to bind this.handleClick and pass it to onClick, this will be undefined when the function is actually called.
@@ -24,7 +27,8 @@ class Toggle extends React.Component
     handleClick = () =>
     {
         this.setState(prevState => ({
-            isToggleOn: !prevState.isToggleOn
+            isToggleOn: !prevState.isToggleOn,
+            count: prevState.count + 1
         }));
     }
 
@@ -32,7 +36,7 @@ class Toggle extends React.Component
     {
         return (
             <button onClick={this.handleClick}>
-                {this.state.isToggleOn ? 'ON' : 'OFF'}
+                {this.state.isToggleOn ? 'ON' : 'OFF'} and count is {this.state.count}
             </button>
         );
     }

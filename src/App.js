@@ -4,6 +4,7 @@ import Game from "./components/Game";
 import SignUpDialog from "./components/SignUpDialog";
 import NameForm from "./components/NameForm";
 import LoginControl from "./components/LoginControl";
+import Toggle from "./components/Toggle";
 
 const numbers = [10, 11, 12, 13]
 
@@ -16,10 +17,8 @@ function App()
           <SignUpDialog/>
           <br/>
           <NameForm/>
-          {/*<NumberList numbers={[1,2,3,4,5]}/>*/}
-          {/*<NumberList numbers={numbers}/>*/}
           <LoginControl></LoginControl>
-          {/*<Toggle />*/}
+          <Toggle />
         </div>
     </div>
   );
